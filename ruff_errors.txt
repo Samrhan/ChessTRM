@@ -1,0 +1,176 @@
+E501 Line too long (94 > 88)
+  --> src/chesstrm/model/layers.py:35:89
+   |
+33 |         super().__init__()
+34 |         self.embedding = nn.Embedding(num_actions, d_model)
+35 |         # We might also need a linear projection if we input soft distributions (logits) later
+   |                                                                                         ^^^^^^
+36 |         # But for now, let's assume we might pass an index or we use this for the initial learned embedding.
+37 |         # The spec mentions "Learnable embedding or projected vector".
+   |
+
+E501 Line too long (108 > 88)
+  --> src/chesstrm/model/layers.py:36:89
+   |
+34 |         self.embedding = nn.Embedding(num_actions, d_model)
+35 |         # We might also need a linear projection if we input soft distributions (logits) later
+36 |         # But for now, let's assume we might pass an index or we use this for the initial learned embedding.
+   |                                                                                         ^^^^^^^^^^^^^^^^^^^^
+37 |         # The spec mentions "Learnable embedding or projected vector".
+38 |         # Let's add a linear layer for projecting a full distribution if needed,
+   |
+
+E501 Line too long (93 > 88)
+  --> src/chesstrm/model/layers.py:39:89
+   |
+37 |         # The spec mentions "Learnable embedding or projected vector".
+38 |         # Let's add a linear layer for projecting a full distribution if needed,
+39 |         # but the primary requirement is often just an embedding for the 'previous best move'
+   |                                                                                         ^^^^^
+40 |         # or a global token.
+   |
+
+E501 Line too long (95 > 88)
+  --> src/chesstrm/model/transformer.py:45:89
+   |
+43 |         """
+44 |         if self.use_checkpointing and self.training:
+45 |             # Checkpointing requires that the input to the checkpointed function requires grad.
+   |                                                                                         ^^^^^^^
+46 |             # Usually x comes from previous layers so it should be fine.
+47 |             return checkpoint(self._forward_impl, x, use_reentrant=False)
+   |
+
+E501 Line too long (92 > 88)
+  --> src/chesstrm/model/trm.py:40:89
+   |
+38 |         # We need to project y logits back to d_model for the next step?
+39 |         # SPEC 3.2: "Projects y logits/indices to d_model (or broadcast global token)."
+40 |         # SPEC 3.3: "Update y_t (via readout or auxiliary head). Store logits for DIS loss."
+   |                                                                                         ^^^^
+41 |         # And "y might be a global token concatenated or broadcasted."
+42 |         # Let's use ActionEmbedding. If we feed back logits, we need a Linear projection.
+   |
+
+E501 Line too long (89 > 88)
+  --> src/chesstrm/model/trm.py:42:89
+   |
+40 |         # SPEC 3.3: "Update y_t (via readout or auxiliary head). Store logits for DIS loss."
+41 |         # And "y might be a global token concatenated or broadcasted."
+42 |         # Let's use ActionEmbedding. If we feed back logits, we need a Linear projection.
+   |                                                                                         ^
+43 |         self.action_embedding = ActionEmbedding(
+44 |             num_actions=self.num_actions, d_model=d_model
+   |
+
+E501 Line too long (111 > 88)
+  --> src/chesstrm/model/trm.py:53:89
+   |
+51 |         # The spec says "n_layers (per block): 2".
+52 |         # "Le noyau neuronal minimaliste (souvent 2 couches seulement)"
+53 |         # So we stack 2 RecursiveBlocks inside the core module, or the RecursiveBlock itself contains 2 layers?
+   |                                                                                         ^^^^^^^^^^^^^^^^^^^^^^^
+54 |         # SPEC 3.2 "TransformerBlock" seems to be a single block.
+55 |         # But "n_layers: 2" suggests we might chain 2 blocks in the loop or the block has 2 sub-layers.
+   |
+
+E501 Line too long (103 > 88)
+  --> src/chesstrm/model/trm.py:55:89
+   |
+53 |         # So we stack 2 RecursiveBlocks inside the core module, or the RecursiveBlock itself contains 2 layers?
+54 |         # SPEC 3.2 "TransformerBlock" seems to be a single block.
+55 |         # But "n_layers: 2" suggests we might chain 2 blocks in the loop or the block has 2 sub-layers.
+   |                                                                                         ^^^^^^^^^^^^^^^
+56 |         # Standard Transformer Encoder Layer has SelfAttn + FFN.
+57 |         # If n_layers=2, we have Block -> Block.
+   |
+
+E501 Line too long (97 > 88)
+   --> src/chesstrm/model/trm.py:107:89
+    |
+105 |             # Residual connection: z = z + gating(z_new) or just z_new
+106 |             # SPEC 3.3: "z = z + self.gating(z_new) # Gating optionnel"
+107 |             # "Residual connections... z = z + ... we don't overwrite z completely, we refine it"
+    |                                                                                         ^^^^^^^^^
+108 |             # Let's use simple residual for now: z_next = z + output_of_blocks
+109 |             z_new = curr
+    |
+
+E501 Line too long (97 > 88)
+   --> src/chesstrm/model/trm.py:116:89
+    |
+114 |             # If y is a global token, how do we get it from z (64 tokens)?
+115 |             # Maybe we pool z? Or we should have included y as a token in the sequence?
+116 |             # SPEC 3.2: "Consider y as a global token concatenated at the start... or broadcast".
+    |                                                                                         ^^^^^^^^^
+117 |             # If we used broadcasting (addition), y is mixed in every token.
+118 |             # We need to extract a new y_emb.
+    |
+
+E501 Line too long (108 > 88)
+   --> src/chesstrm/model/trm.py:133:89
+    |
+131 |             # Or maybe we should have a specific layer for this?
+132 |             # SPEC didn't specify `y_update_layer`.
+133 |             # Let's assume Mean Pooling for now as it's standard for "Global" info extraction from sequence.
+    |                                                                                         ^^^^^^^^^^^^^^^^^^^^
+134 |
+135 |             y_emb = y_emb_update  # Update y_emb for next step (and readout)
+    |
+
+E501 Line too long (116 > 88)
+   --> src/chesstrm/model/trm.py:146:89
+    |
+144 |             # In our case y_emb is already d_model.
+145 |             # Do we re-project logits?
+146 |             # SPEC 2.2: "Réinjection: ... logits (ou leur version softmaxée) doivent être re-projetés vers d_model."
+    |                                                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+147 |             # BUT SPEC 3.3 code snippet: "y_emb_new = self.y_update_layer(z_new) ... y_emb = y_emb_new"
+148 |             # It seems we can stay in latent space d_model for y without going through logits -> project.
+    |
+
+E501 Line too long (103 > 88)
+   --> src/chesstrm/model/trm.py:147:89
+    |
+145 |             # Do we re-project logits?
+146 |             # SPEC 2.2: "Réinjection: ... logits (ou leur version softmaxée) doivent être re-projetés vers d_model."
+147 |             # BUT SPEC 3.3 code snippet: "y_emb_new = self.y_update_layer(z_new) ... y_emb = y_emb_new"
+    |                                                                                         ^^^^^^^^^^^^^^^
+148 |             # It seems we can stay in latent space d_model for y without going through logits -> project.
+149 |             # Staying in latent space is smoother for gradients.
+    |
+
+E501 Line too long (105 > 88)
+   --> src/chesstrm/model/trm.py:148:89
+    |
+146 |             # SPEC 2.2: "Réinjection: ... logits (ou leur version softmaxée) doivent être re-projetés vers d_model."
+147 |             # BUT SPEC 3.3 code snippet: "y_emb_new = self.y_update_layer(z_new) ... y_emb = y_emb_new"
+148 |             # It seems we can stay in latent space d_model for y without going through logits -> project.
+    |                                                                                         ^^^^^^^^^^^^^^^^^
+149 |             # Staying in latent space is smoother for gradients.
+150 |             # The logits are just "decoded" for supervision.
+    |
+
+E501 Line too long (162 > 88)
+   --> src/chesstrm/model/trm.py:155:89
+    |
+153 | …be we should use the logits?
+154 | …ts.
+155 | …ionEmbedding in the loop, only for initialization if we had a start token (which we handle via y_init).
+    |                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+156 | …
+157 | … pooling z), then Readout for loss.
+    |
+
+E501 Line too long (94 > 88)
+   --> src/chesstrm/model/trm.py:157:89
+    |
+155 |             # If we stay in latent space, we don't need ActionEmbedding in the loop, only for initialization if we had a start token …
+156 |
+157 |             # Let's stick to: Update y in latent space (via pooling z), then Readout for loss.
+    |                                                                                         ^^^^^^
+158 |
+159 |         return all_logits
+    |
+
+Found 16 errors.
